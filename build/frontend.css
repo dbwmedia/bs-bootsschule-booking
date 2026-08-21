@@ -1,0 +1,413 @@
+/**
+ * BS Bootsschule Booking - Modern Frontend Styles
+ * Schönes, modernes Design für die Terminauswahl
+ */
+
+/* CSS Variables - verwendet Theme-Farbe #3f82ac */
+:root {
+    --bs-primary: #3f82ac;
+    --bs-primary-dark: #2d6a8f;
+    --bs-primary-light: #e8f2f8;
+    --bs-accent: #5a9bc4;
+    --bs-success: #10b981;
+    --bs-warning: #f59e0b;
+    --bs-danger: #ef4444;
+    --bs-text: #1f2937;
+    --bs-text-muted: #6b7280;
+    --bs-border: #e5e7eb;
+    --bs-bg: #f9fafb;
+    --bs-white: #ffffff;
+    --bs-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --bs-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --bs-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    --bs-radius: 12px;
+    --bs-radius-sm: 8px;
+    --bs-transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hauptcontainer */
+.bs-bootsschule-booking {
+    max-width: 720px;
+    margin: 32px auto;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+/* Header */
+.bs-bootsschule-booking h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--bs-text);
+    margin: 0 0 12px;
+    letter-spacing: -0.025em;
+}
+
+.bs-bootsschule-booking > p {
+    font-size: 16px;
+    color: var(--bs-text-muted);
+    margin: 0 0 28px;
+    line-height: 1.6;
+}
+
+/* Kurs-Sektionen */
+.bs-template {
+    background: var(--bs-white);
+    border-radius: var(--bs-radius);
+    padding: 24px;
+    margin-bottom: 20px;
+    box-shadow: var(--bs-shadow);
+    border: 1px solid var(--bs-border);
+    transition: var(--bs-transition);
+}
+
+.bs-template:hover {
+    box-shadow: var(--bs-shadow-lg);
+}
+
+/* Kurs-Titel */
+.bs-template h4 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--bs-text);
+    margin: 0 0 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* 2-Tage Badge */
+.bs-template h4 span {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--bs-warning);
+    background: rgba(245, 158, 11, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+/* Location */
+.bs-template .loc,
+.bs-template p {
+    font-size: 14px;
+    color: var(--bs-text-muted);
+    margin: 0 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Pin-Emoji nur einmal im HTML, nicht per ::before */
+.bs-template .loc {
+    /* Kein ::before nötig, Emoji ist im HTML */}
+
+/* Termin-Optionen */
+.bs-dates {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.bs-dates label {
+    display: flex;
+    align-items: center;
+    padding: 16px 20px;
+    background: var(--bs-bg);
+    border: 2px solid var(--bs-border);
+    border-radius: var(--bs-radius-sm);
+    cursor: pointer;
+    transition: var(--bs-transition);
+    position: relative;
+    overflow: hidden;
+}
+
+.bs-dates label::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--bs-primary);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.bs-dates label:hover {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary-light);
+}
+
+.bs-dates label:hover::before {
+    transform: scaleY(1);
+}
+
+/* Ausgewählter Zustand - Theme-Farbe */
+.bs-dates label.selected,
+.bs-dates label:has(input:checked) {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary-light);
+    box-shadow: 0 0 0 3px rgba(63, 130, 172, 0.15);
+}
+
+.bs-dates label.selected::before,
+.bs-dates label:has(input:checked)::before {
+    transform: scaleY(1);
+}
+
+/* Radio Buttons - Custom Style */
+.bs-dates input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--bs-border);
+    border-radius: 50%;
+    margin-right: 16px;
+    flex-shrink: 0;
+    cursor: pointer;
+    position: relative;
+    transition: var(--bs-transition);
+    background: var(--bs-white);
+}
+
+.bs-dates input[type="radio"]:hover {
+    border-color: var(--bs-primary);
+}
+
+.bs-dates input[type="radio"]:checked {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary);
+}
+
+.bs-dates input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 8px;
+    height: 8px;
+    background: var(--bs-white);
+    border-radius: 50%;
+}
+
+.bs-dates input[type="radio"]:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* Termin-Text */
+.bs-dates label > span {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+}
+
+.bs-dates label strong {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--bs-text);
+}
+
+.bs-dates label span > span {
+    font-size: 14px;
+    color: var(--bs-text-muted);
+}
+
+/* Plus-Zeichen zwischen Tagen */
+.bs-dates label span span[style*="color:#aaa"] {
+    color: var(--bs-primary) !important;
+    font-weight: 600;
+    font-size: 16px;
+}
+
+/* Verfügbarkeits-Badge */
+.bs-dates label small {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bs-success);
+    background: rgba(16, 185, 129, 0.1); /* Grün bleibt für Verfügbarkeit */
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+}
+
+/* Ausgebucht */
+.bs-dates label span span[style*="color:#dc3232"],
+.bs-full {
+    color: var(--bs-danger) !important;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: rgba(239, 68, 68, 0.1);
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-left: auto;
+}
+
+/* "In Warenkorb" Button - Theme-Farbe */
+.bs-add-cart {
+    width: 100%;
+    padding: 18px 32px;
+    margin-top: 28px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--bs-white);
+    background: var(--bs-primary);
+    border: none;
+    border-radius: var(--bs-radius-sm);
+    cursor: pointer;
+    transition: var(--bs-transition);
+    box-shadow: var(--bs-shadow);
+    text-transform: none;
+    letter-spacing: 0.01em;
+}
+
+.bs-add-cart:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--bs-shadow-lg);
+    background: var(--bs-primary-dark);
+}
+
+.bs-add-cart:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.bs-add-cart:disabled {
+    background: #d1d5db;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+/* Nachrichten-Bereich */
+.bs-messages {
+    margin-top: 16px;
+    padding: 14px 18px;
+    border-radius: var(--bs-radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.bs-messages:empty {
+    display: none;
+}
+
+/* Fehler-Meldung */
+.bs-messages.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: var(--bs-danger);
+    border-left: 4px solid var(--bs-danger);
+}
+
+/* Erfolg-Meldung */
+.bs-messages.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: var(--bs-success);
+    border-left: 4px solid var(--bs-success);
+}
+
+/* Info-Box "Keine Termine" */
+.bs-no-dates {
+    text-align: center;
+    padding: 20px;
+    background: rgba(239, 68, 68, 0.05);
+    border-radius: var(--bs-radius-sm);
+    color: var(--bs-danger);
+    font-size: 14px;
+    font-weight: 500;
+}
+
+/* Disabled State für Labels */
+.bs-dates label.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: #f3f4f6;
+}
+
+.bs-dates label.disabled:hover {
+    border-color: var(--bs-border);
+    background: #f3f4f6;
+}
+
+.bs-dates label.disabled::before {
+    display: none;
+}
+
+/* Responsive Anpassungen */
+@media (max-width: 640px) {
+    .bs-bootsschule-booking {
+        margin: 20px 16px;
+    }
+    
+    .bs-bootsschule-booking h3 {
+        font-size: 24px;
+    }
+    
+    .bs-template {
+        padding: 20px;
+    }
+    
+    .bs-template h4 {
+        font-size: 18px;
+        flex-wrap: wrap;
+    }
+    
+    .bs-dates label {
+        padding: 14px 16px;
+    }
+    
+    .bs-dates label strong {
+        font-size: 14px;
+    }
+    
+    .bs-dates label span > span {
+        font-size: 13px;
+    }
+    
+    .bs-add-cart {
+        padding: 16px 24px;
+        font-size: 15px;
+    }
+}
+
+/* Animationen */
+@keyframes bs-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.bs-template {
+    animation: bs-fade-in 0.4s ease-out;
+}
+
+.bs-template:nth-child(2) {
+    animation-delay: 0.1s;
+}
+
+/* Loading State */
+.bs-bootsschule-booking.loading {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+/* Focus States für Accessibility */
+.bs-dates label:focus-within {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}
+
+.bs-add-cart:focus {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 2px;
+}

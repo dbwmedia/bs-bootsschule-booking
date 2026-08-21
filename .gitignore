@@ -1,0 +1,16 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Dependencies
+/vendor/
+/node_modules/
+
+# Build artefacts
+/dist/
+*.zip
+*.log
+
+# Local config
+.env
+.env.local

@@ -24,15 +24,29 @@ Box "Bootsschule Booking" im Produkt:
 
 Produkte aus v1 übernehmen ihre alten Kurstitel automatisch als "Name enthält"-Filter, bis sie einmal gespeichert werden.
 
+## Freie Plätze und Badges (seit v2.1)
+
+Freie Plätze = Amelia-Kapazität - Amelia-Buchungen (approved/pending, Personen) - Kombi-Bestellungen (WooCommerce-Status processing/completed/on-hold, mit Menge).
+
+Pro Termin ein oder zwei Badges, **nur mit echten Fakten**:
+- `Ausgebucht`: 0 frei, Termin nicht wählbar (auch serverseitig geprüft)
+- `Nur noch X Plätze frei`: ab 5 freien Plätzen oder weniger (Filter `bs_booking_low_seats`)
+- `Startet in X Tagen` / `morgen` / `heute`: ab 14 Tagen vor Beginn (Filter `bs_booking_urgency_days`)
+- sonst `Plätze frei`
+
+Keine künstliche Verknappung: eine unwahre Knappheitsangabe wäre irreführende Werbung (UWG §5).
+Events mit Ticket-Preisen (customPricing) oder ohne Kapazität gelten als "Kapazität unbekannt" und bekommen keine Platzangabe.
+Die Produkt-Box zeigt pro Termin die Rechnung (z.B. "10 frei (15 Plätze, 3 Amelia, 2 Kombi)").
+
 ## Bewusste Grenzen
 
-- **Keine Platzverwaltung.** Freie Plätze werden nicht angezeigt oder geprüft.
-- **Kein Zurückschreiben an Amelia.** Kombi-Buchungen stehen nur in den WooCommerce-Bestellungen (Meta `_bs_amelia_event_ids`), nicht in Amelias Teilnehmerlisten.
+- **Kein Zurückschreiben an Amelia.** Kombi-Buchungen stehen nur in den WooCommerce-Bestellungen (Meta `_bs_amelia_event_ids`), nicht in Amelias Teilnehmerlisten. Amelia selbst zeigt deshalb zu viele freie Plätze an, die Kombi-Seite rechnet sie ab.
 
 ## Dateien
 
 - `includes/amelia.php` Lesen der Amelia-Tabellen, UTC-Umrechnung, Tage aus Zeiträumen
 - `includes/courses.php` Kurs-Konfiguration, Matching, Formatierung
+- `includes/availability.php` Freie Plätze, Kombi-Bestellungen, Badges
 - `includes/admin.php` Produkt-Metabox mit Vorschau
 - `includes/frontend.php` Terminwahl auf der Produktseite, AJAX "In Warenkorb"
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung

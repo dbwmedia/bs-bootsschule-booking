@@ -420,3 +420,54 @@
 .bs-dates .bs-option__loc {
     flex-basis: 100%;
 }
+
+/* v2.1: availability badges (facts only: real free seats, real start date) */
+.bs-dates label > .bs-badges {
+    flex: 0 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-left: 12px;
+}
+
+.bs-dates label small.bs-badge {
+    margin-left: 0;
+    white-space: nowrap;
+}
+
+.bs-dates label small.bs-badge--open {
+    color: var(--bs-success);
+    background: rgba(16, 185, 129, 0.1);
+}
+
+.bs-dates label small.bs-badge--soon {
+    color: #b45309;
+    background: rgba(245, 158, 11, 0.12);
+}
+
+.bs-dates label small.bs-badge--low {
+    color: #fff;
+    background: var(--bs-danger);
+    font-weight: 600;
+}
+
+.bs-dates label small.bs-badge--full {
+    color: var(--bs-danger);
+    background: rgba(239, 68, 68, 0.1);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+@media (max-width: 640px) {
+    .bs-dates label {
+        flex-wrap: wrap;
+    }
+
+    .bs-dates label > .bs-badges {
+        flex-basis: 100%;
+        justify-content: flex-start;
+        margin: 8px 0 0 38px;
+    }
+}

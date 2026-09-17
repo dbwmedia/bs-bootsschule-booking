@@ -119,6 +119,25 @@ function bs_amelia_upcoming_events() {
         $tags_by_event[(int) $tag['eventId']][] = $tag['name'];
     }
 
+    // Booked persons per event (a booking is linked to every period of its event)
+    $booked_by_event = array();
+    $bookings_table        = bs_amelia_table('customer_bookings');
+    $bookings_periods_table = bs_amelia_table('customer_bookings_to_events_periods');
+    $booked_rows = $wpdb->get_results(
+        "SELECT x.eventId, SUM(cb.persons) AS persons
+         FROM (SELECT DISTINCT cbp.customerBookingId, ep.eventId
+               FROM $bookings_periods_table cbp
+               INNER JOIN $periods_table ep ON ep.id = cbp.eventPeriodId
+               WHERE ep.eventId IN ($ids)) x
+         INNER JOIN $bookings_table cb ON cb.id = x.customerBookingId
+         WHERE cb.status IN ('approved', 'pending')
+         GROUP BY x.eventId",
+        ARRAY_A
+    );
+    foreach ((array) $booked_rows as $booked) {
+        $booked_by_event[(int) $booked['eventId']] = (int) $booked['persons'];
+    }
+
     $locations = array();
     foreach ((array) $wpdb->get_results("SELECT id, name, address FROM $locations_table", ARRAY_A) as $location) {
         $locations[(int) $location['id']] = array(
@@ -136,12 +155,21 @@ function bs_amelia_upcoming_events() {
         $days = bs_amelia_period_days(isset($periods_by_event[$id]) ? $periods_by_event[$id] : array());
         if (empty($days)) continue;
 
+        // Capacity is only reliable for plain events. Ticket-based pricing has
+        // per-ticket spots, so it is treated as unknown.
+        $capacity = null;
+        if (empty($row['customPricing']) && isset($row['maxCapacity']) && (int) $row['maxCapacity'] > 0) {
+            $capacity = (int) $row['maxCapacity'];
+        }
+
         $events[$id] = array(
             'id'       => $id,
             'name'     => (string) $row['name'],
             'tags'     => isset($tags_by_event[$id]) ? $tags_by_event[$id] : array(),
             'location' => bs_amelia_event_location($row, $locations),
             'days'     => $days,
+            'capacity' => $capacity,
+            'booked'   => isset($booked_by_event[$id]) ? $booked_by_event[$id] : 0,
         );
     }
 

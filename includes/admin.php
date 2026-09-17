@@ -61,7 +61,8 @@ function bs_bootsschule_product_meta($post) {
                 echo '<ul style="margin:0 0 0 18px;list-style:disc;">';
                 foreach ($course['events'] as $event) {
                     echo '<li>' . esc_html(bs_format_days($event['days']) . ', ' . bs_format_times($event['days']))
-                        . ' <span style="color:#646970;">(Amelia #' . $event['id'] . ': ' . esc_html($event['name']) . ')</span></li>';
+                        . ' <span style="color:#646970;">(Amelia #' . $event['id'] . ': ' . esc_html($event['name']) . ')</span>'
+                        . ' <strong>' . esc_html(bs_admin_seats_summary($event)) . '</strong></li>';
                 }
                 echo '</ul>';
             }
@@ -73,19 +74,29 @@ function bs_bootsschule_product_meta($post) {
     if (empty($events)) {
         echo '<p>Keine kommenden Events in Amelia gefunden.</p>';
     } else {
-        echo '<table class="widefat striped" style="margin-top:8px;"><thead><tr><th>ID</th><th>Name</th><th>Tags</th><th>Termine</th><th>Ort</th></tr></thead><tbody>';
+        echo '<table class="widefat striped" style="margin-top:8px;"><thead><tr><th>ID</th><th>Name</th><th>Tags</th><th>Termine</th><th>Plätze</th><th>Ort</th></tr></thead><tbody>';
         foreach ($events as $event) {
             echo '<tr>';
             echo '<td>' . $event['id'] . '</td>';
             echo '<td>' . esc_html($event['name']) . '</td>';
             echo '<td>' . esc_html(implode(', ', $event['tags'])) . '</td>';
             echo '<td>' . esc_html(bs_format_days($event['days']) . ', ' . bs_format_times($event['days'])) . '</td>';
+            echo '<td>' . esc_html(bs_admin_seats_summary($event)) . '</td>';
             echo '<td>' . esc_html($event['location']) . '</td>';
             echo '</tr>';
         }
         echo '</tbody></table>';
     }
     echo '</details>';
+}
+
+/** "3 frei (15 Plätze, 10 Amelia, 2 Kombi)" */
+function bs_admin_seats_summary(array $event) {
+    if ($event['capacity'] === null) return 'Kapazität unbekannt';
+    $kombi = bs_kombi_booked_counts();
+    $kombi_count = isset($kombi[$event['id']]) ? $kombi[$event['id']] : 0;
+    $availability = bs_event_availability($event);
+    return $availability['free'] . ' frei (' . $event['capacity'] . ' Plätze, ' . $event['booked'] . ' Amelia, ' . $kombi_count . ' Kombi)';
 }
 
 add_action('save_post_product', function($post_id) {

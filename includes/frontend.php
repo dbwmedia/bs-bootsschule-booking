@@ -24,9 +24,16 @@ function bs_bootsschule_display() {
 
     remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
 
+    // A course is bookable if at least one of its dates still has seats.
     $bookable = true;
-    foreach ($courses as $course) {
-        if (empty($course['events'])) $bookable = false;
+    foreach ($courses as $i => $course) {
+        $courses[$i]['has_seats'] = false;
+        foreach ($course['events'] as $event_id => $event) {
+            $availability = bs_event_availability($event);
+            $courses[$i]['events'][$event_id]['availability'] = $availability;
+            if (!$availability['full']) $courses[$i]['has_seats'] = true;
+        }
+        if (!$courses[$i]['has_seats']) $bookable = false;
     }
 
     echo '<div class="bs-bootsschule-booking">';
@@ -46,15 +53,24 @@ function bs_bootsschule_display() {
         if (empty($course['events'])) {
             echo '<p class="bs-no-dates">Für diesen Kurs sind derzeit keine Termine verfügbar.</p>';
         } else {
+            if (!$course['has_seats']) {
+                echo '<p class="bs-no-dates">Alle Termine für diesen Kurs sind ausgebucht.</p>';
+            }
             echo '<div class="bs-dates">';
             foreach ($course['events'] as $event) {
-                echo '<label>';
-                echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '">';
+                $full = $event['availability']['full'];
+                echo '<label' . ($full ? ' class="disabled"' : '') . '>';
+                echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '"' . ($full ? ' disabled' : '') . '>';
                 echo '<span class="bs-option">';
                 echo '<strong>' . esc_html(bs_format_days($event['days'])) . '</strong>';
                 echo '<span class="bs-option__time">' . esc_html(bs_format_times($event['days'])) . '</span>';
                 if (!$location && $event['location']) {
                     echo '<span class="bs-option__loc">📍 ' . esc_html($event['location']) . '</span>';
+                }
+                echo '</span>';
+                echo '<span class="bs-badges">';
+                foreach (bs_availability_badges($event['availability']) as $badge) {
+                    echo '<small class="bs-badge bs-badge--' . $badge['type'] . '">' . esc_html($badge['text']) . '</small>';
                 }
                 echo '</span>';
                 echo '</label>';
@@ -81,7 +97,7 @@ function bs_bootsschule_display() {
             ),
         ));
     } else {
-        echo '<div class="bs-messages error">Dieser Kurs ist derzeit nicht buchbar, weil nicht für alle Kurse Termine verfügbar sind.</div>';
+        echo '<div class="bs-messages error">Dieser Kurs ist derzeit nicht buchbar, weil nicht für alle Kurse freie Termine verfügbar sind.</div>';
     }
 
     echo '</div>';
@@ -111,6 +127,9 @@ function bs_bootsschule_ajax() {
         }
 
         $event = $course['events'][$event_id];
+        if (bs_event_availability($event)['full']) {
+            wp_send_json_error(array('message' => 'Der gewählte Termin für ' . $course['title'] . ' ist leider ausgebucht. Bitte wähle einen anderen.'));
+        }
         $booked[] = array(
             'course'   => $course['title'],
             'event_id' => $event['id'],

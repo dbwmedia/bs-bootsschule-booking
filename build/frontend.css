@@ -475,7 +475,8 @@
 /* v2.6: Kombi upsell box on single course products */
 .bs-upsell {
     position: relative;
-    margin: 24px 0 8px;
+    /* 16px sides: aligned with the padding of the Amelia event list above */
+    margin: 24px 16px 8px;
     padding: 22px 24px;
     background: linear-gradient(135deg, var(--bs-primary-light), var(--bs-white) 70%);
     border: 2px solid var(--bs-primary);

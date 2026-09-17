@@ -65,6 +65,7 @@ Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`i
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung
 - `includes/amelia-sync.php` Kombi-Bestellungen als Amelia-Buchungen anlegen und stornieren
 - `includes/upsell.php` Kombi-Upsell-Box auf den Einzelprodukten
+- `includes/upsell-stats.php`, `build/upsell.js` anonyme Upsell-Statistik (Backend-Seite)
 - `build/frontend.css`, `build/frontend.js` Frontend-Assets (handgeschrieben, kein Build-Schritt)
 
 ## Upsell-Box (seit v2.6)
@@ -73,7 +74,10 @@ Auf Einzelprodukten (z.B. SBF Binnen, SBF See) erscheint unter der Amelia-Termin
 
 - Einstellung im **Kombi-Produkt**: "Upsell-Box auf Einzelprodukten", dort alle Einzelkurse wählen, aus denen die Kombi besteht.
 - Zahlen sind echt: Summe der Einzelpreise durchgestrichen, Kombi-Preis, Ersparnis in € und % (abgerundet), nächster buchbarer Start pro Kurs.
+- Titel mit Upgrade-Framing: "Für nur 179 € mehr: SBF See dazu" (Kombi-Preis minus Preis der aktuellen Seite), darunter die Ersparnis gegenüber Einzelbuchung.
 - Keine Box, wenn es keine Ersparnis gibt, das Kombi-Produkt nicht kaufbar ist oder ein Kurs keinen freien Termin mehr hat.
+
+**Statistik** unter WooCommerce > Kombi-Upsell (`includes/upsell-stats.php`, `build/upsell.js`): Aufrufe (Box zur Hälfte sichtbar), Klicks und Kombi-Bestellungen pro Einzelprodukt, mit Klickrate. Anonym ohne Cookies: Die Herkunft läuft über `?bs_src=<id>` in den Warenkorb (`_bs_upsell_source` am Bestell-Item). Eingeloggte Shop-Mitarbeiter werden nicht gezählt. Zurücksetzen per Button.
 
 ## Autoren
 

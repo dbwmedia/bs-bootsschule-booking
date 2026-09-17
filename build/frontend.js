@@ -97,6 +97,7 @@
                 action: 'bs_bootsschule_add_cart',
                 product_id: config.productId,
                 selection: JSON.stringify(selection),
+                upsell_source: new URLSearchParams(window.location.search).get('bs_src') || '',
                 _ajax_nonce: config.nonce
             })
         })

@@ -66,12 +66,15 @@ function bs_upsell_offer($kombi_id, $current_id) {
     $sum = 0.0;
     $others = array();
     $count = 0;
+    $current_price = null;
     foreach (bs_upsell_product_ids($kombi_id) as $id) {
         $single = wc_get_product($id);
         if (!$single) continue;
-        $sum += (float) wc_get_price_to_display($single);
+        $price = (float) wc_get_price_to_display($single);
+        $sum += $price;
         $count++;
-        if ($id !== $current_id) $others[] = $single->get_name();
+        if ($id === $current_id) $current_price = $price;
+        else $others[] = $single->get_name();
     }
 
     $kombi_price = (float) wc_get_price_to_display($kombi);
@@ -94,7 +97,9 @@ function bs_upsell_offer($kombi_id, $current_id) {
     if (empty($next)) return null;
 
     return array(
-        'url'         => get_permalink($kombi_id),
+        'source'      => $current_id,
+        'url'         => add_query_arg('bs_src', $current_id, get_permalink($kombi_id)),
+        'extra'       => $current_price !== null ? $kombi_price - $current_price : null,
         'others'      => $others,
         'sum'         => $sum,
         'kombi_price' => $kombi_price,
@@ -104,14 +109,27 @@ function bs_upsell_offer($kombi_id, $current_id) {
     );
 }
 
+/** Whole amounts without decimals ("179 €"), others with cents. */
+function bs_upsell_money($amount) {
+    return wc_price($amount, array('decimals' => fmod($amount, 1) ? 2 : 0));
+}
+
 function bs_upsell_render(array $offer) {
-    $saving = wc_price($offer['saving'], array('decimals' => fmod($offer['saving'], 1) ? 2 : 0));
+    $saving = bs_upsell_money($offer['saving']);
     $others = implode(' und ', $offer['others']);
 
-    echo '<aside class="bs-upsell" aria-label="Kombi-Angebot">';
+    echo '<aside class="bs-upsell" aria-label="Kombi-Angebot" data-source="' . (int) $offer['source'] . '">';
     echo '<span class="bs-upsell__eyebrow">Kombi-Vorteil</span>';
-    echo '<h3 class="bs-upsell__title">Nimm den ' . esc_html($others) . ' gleich mit und spar ' . wp_kses_post($saving) . '</h3>';
-    echo '<p class="bs-upsell__text">Im Kombi-Kurs machst du beide Führerscheine in einem Ablauf. Wer später einzeln nachbucht, zahlt den vollen Preis.</p>';
+
+    // Upgrade framing: the extra cost for the second course is the strongest
+    // argument for someone who already decided on this one.
+    if ($offer['extra'] !== null && $offer['extra'] > 0) {
+        echo '<h3 class="bs-upsell__title">Für nur ' . wp_kses_post(bs_upsell_money($offer['extra'])) . ' mehr: ' . esc_html($others) . ' dazu</h3>';
+        echo '<p class="bs-upsell__text">Du sparst ' . wp_kses_post($saving) . ' gegenüber der Einzelbuchung und machst beide Führerscheine in einem Ablauf. Wer später einzeln nachbucht, zahlt den vollen Preis.</p>';
+    } else {
+        echo '<h3 class="bs-upsell__title">Nimm den ' . esc_html($others) . ' gleich mit und spar ' . wp_kses_post($saving) . '</h3>';
+        echo '<p class="bs-upsell__text">Im Kombi-Kurs machst du beide Führerscheine in einem Ablauf. Wer später einzeln nachbucht, zahlt den vollen Preis.</p>';
+    }
 
     echo '<div class="bs-upsell__price">';
     echo '<del class="bs-upsell__old">' . wp_kses_post(wc_price($offer['sum'])) . ' einzeln</del>';
@@ -127,4 +145,7 @@ function bs_upsell_render(array $offer) {
 
     echo '<a class="bs-upsell__cta" href="' . esc_url($offer['url']) . '">Zum Kombi-Kurs</a>';
     echo '</aside>';
+
+    wp_enqueue_script('bs-booking-upsell', BS_BOOTSCHULE_URL . 'build/upsell.js', array(), BS_BOOTSCHULE_VERSION, true);
+    wp_localize_script('bs-booking-upsell', 'bsUpsell', array('ajaxUrl' => admin_url('admin-ajax.php')));
 }

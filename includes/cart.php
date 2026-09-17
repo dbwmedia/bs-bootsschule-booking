@@ -42,6 +42,10 @@ add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_
         $item->add_meta_data('_bs_courses', wp_json_encode(array_map(function($course) {
             return array('course' => $course['course'], 'event_id' => $course['event_id']);
         }, $values['bs_courses'])));
+        if (!empty($values['bs_upsell_source'])) {
+            $item->add_meta_data('_bs_upsell_source', (int) $values['bs_upsell_source']);
+            bs_upsell_stats_increment((int) $values['bs_upsell_source'], 'orders');
+        }
         return;
     }
 

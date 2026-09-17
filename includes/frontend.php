@@ -149,7 +149,15 @@ function bs_bootsschule_ajax() {
         wp_send_json_error(array('message' => 'Für dieses Produkt sind keine Kurse hinterlegt.'));
     }
 
-    $added = WC()->cart->add_to_cart($product_id, 1, 0, array(), array('bs_courses' => $booked));
+    $cart_data = array('bs_courses' => $booked);
+
+    // Came from the upsell box on a single product (?bs_src=<id>), for the statistics.
+    $upsell_source = isset($_POST['upsell_source']) ? absint($_POST['upsell_source']) : 0;
+    if ($upsell_source && get_post_type($upsell_source) === 'product') {
+        $cart_data['bs_upsell_source'] = $upsell_source;
+    }
+
+    $added = WC()->cart->add_to_cart($product_id, 1, 0, array(), $cart_data);
 
     if ($added) {
         wp_send_json_success(array('cart_url' => wc_get_cart_url()));

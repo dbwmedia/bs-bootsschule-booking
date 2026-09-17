@@ -9,8 +9,11 @@
 
 if (!defined('WPINC')) die;
 
-/** Rendered before the Amelia event list (theme hooks it at priority 30). */
-add_action('woocommerce_single_product_summary', 'bs_upsell_display', 28);
+/**
+ * Rendered right after the Amelia event list (theme hooks it at priority 30):
+ * visitors see the course they came for first, undecided ones meet the offer.
+ */
+add_action('woocommerce_single_product_summary', 'bs_upsell_display', 31);
 
 function bs_upsell_display() {
     global $product;

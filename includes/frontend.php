@@ -1,0 +1,132 @@
+<?php
+/**
+ * Date selection on the product page and add-to-cart handling.
+ */
+
+if (!defined('WPINC')) die;
+
+add_action('wp_enqueue_scripts', function() {
+    if (!is_product()) return;
+    wp_enqueue_style('bs-booking-frontend', BS_BOOTSCHULE_URL . 'build/frontend.css', array(), BS_BOOTSCHULE_VERSION);
+    wp_register_script('bs-booking-frontend', BS_BOOTSCHULE_URL . 'build/frontend.js', array(), BS_BOOTSCHULE_VERSION, true);
+});
+
+add_action('woocommerce_single_product_summary', 'bs_bootsschule_display', 25);
+function bs_bootsschule_display() {
+    global $product;
+    if (!$product) return;
+
+    $product_id = $product->get_id();
+    if (get_post_meta($product_id, '_bs_is_booking', true) !== 'yes') return;
+
+    $courses = bs_get_courses_with_events($product_id);
+    if (empty($courses)) return;
+
+    remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_add_to_cart', 30);
+
+    $bookable = true;
+    foreach ($courses as $course) {
+        if (empty($course['events'])) $bookable = false;
+    }
+
+    echo '<div class="bs-bootsschule-booking">';
+    echo '<h3>Terminwahl</h3>';
+    echo '<p>' . (count($courses) > 1 ? 'Bitte wähle pro Kurs einen Termin.' : 'Bitte wähle einen Termin.') . '</p>';
+
+    foreach ($courses as $index => $course) {
+        $duration = bs_course_duration_label($course['events']);
+        $location = bs_course_location($course);
+
+        echo '<div class="bs-template" data-course-index="' . $index . '" data-course-title="' . esc_attr($course['title']) . '">';
+        echo '<h4>' . esc_html($course['title']);
+        if ($duration) echo ' <span>' . esc_html($duration) . '</span>';
+        echo '</h4>';
+        if ($location) echo '<p class="loc">📍 ' . esc_html($location) . '</p>';
+
+        if (empty($course['events'])) {
+            echo '<p class="bs-no-dates">Für diesen Kurs sind derzeit keine Termine verfügbar.</p>';
+        } else {
+            echo '<div class="bs-dates">';
+            foreach ($course['events'] as $event) {
+                echo '<label>';
+                echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '">';
+                echo '<span class="bs-option">';
+                echo '<strong>' . esc_html(bs_format_days($event['days'])) . '</strong>';
+                echo '<span class="bs-option__time">' . esc_html(bs_format_times($event['days'])) . '</span>';
+                if (!$location && $event['location']) {
+                    echo '<span class="bs-option__loc">📍 ' . esc_html($event['location']) . '</span>';
+                }
+                echo '</span>';
+                echo '</label>';
+            }
+            echo '</div>';
+        }
+        echo '</div>';
+    }
+
+    if ($bookable) {
+        echo '<button type="button" class="bs-add-cart" disabled>In Warenkorb</button>';
+        echo '<div class="bs-messages" role="alert"></div>';
+
+        wp_enqueue_script('bs-booking-frontend');
+        wp_localize_script('bs-booking-frontend', 'bsBookingFrontend', array(
+            'ajaxUrl'   => admin_url('admin-ajax.php'),
+            'nonce'     => wp_create_nonce('bs_bootsschule'),
+            'productId' => $product_id,
+            'i18n'      => array(
+                'addToCart'   => 'In Warenkorb',
+                'chooseFor'   => 'Bitte Termin für %s wählen',
+                'adding'      => 'Wird hinzugefügt...',
+                'serverError' => 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
+            ),
+        ));
+    } else {
+        echo '<div class="bs-messages error">Dieser Kurs ist derzeit nicht buchbar, weil nicht für alle Kurse Termine verfügbar sind.</div>';
+    }
+
+    echo '</div>';
+}
+
+add_action('wp_ajax_bs_bootsschule_add_cart', 'bs_bootsschule_ajax');
+add_action('wp_ajax_nopriv_bs_bootsschule_add_cart', 'bs_bootsschule_ajax');
+function bs_bootsschule_ajax() {
+    check_ajax_referer('bs_bootsschule');
+
+    $product_id = isset($_POST['product_id']) ? absint($_POST['product_id']) : 0;
+    $selection  = isset($_POST['selection']) ? json_decode(wp_unslash($_POST['selection']), true) : null;
+
+    if (!$product_id || !is_array($selection) || get_post_meta($product_id, '_bs_is_booking', true) !== 'yes') {
+        wp_send_json_error(array('message' => 'Bitte wähle deine Termine aus.'));
+    }
+
+    $booked = array();
+    foreach (bs_get_courses_with_events($product_id) as $index => $course) {
+        $event_id = isset($selection[$index]) ? absint($selection[$index]) : 0;
+        if (!$event_id) {
+            wp_send_json_error(array('message' => 'Bitte wähle einen Termin für ' . $course['title'] . '.'));
+        }
+        // Only events that currently match this course are accepted.
+        if (!isset($course['events'][$event_id])) {
+            wp_send_json_error(array('message' => 'Der gewählte Termin für ' . $course['title'] . ' ist nicht mehr verfügbar. Bitte lade die Seite neu.'));
+        }
+
+        $event = $course['events'][$event_id];
+        $booked[] = array(
+            'course'   => $course['title'],
+            'event_id' => $event['id'],
+            'days'     => $event['days'],
+            'location' => $course['location'] !== '' ? $course['location'] : $event['location'],
+        );
+    }
+
+    if (empty($booked)) {
+        wp_send_json_error(array('message' => 'Für dieses Produkt sind keine Kurse hinterlegt.'));
+    }
+
+    $added = WC()->cart->add_to_cart($product_id, 1, 0, array(), array('bs_courses' => $booked));
+
+    if ($added) {
+        wp_send_json_success(array('cart_url' => wc_get_cart_url()));
+    }
+    wp_send_json_error(array('message' => 'Fehler beim Hinzufügen zum Warenkorb.'));
+}

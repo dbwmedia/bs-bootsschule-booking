@@ -411,3 +411,12 @@
     outline: 2px solid var(--bs-primary);
     outline-offset: 2px;
 }
+
+/* v2.0: option layout (days, time, optional location) */
+.bs-dates .bs-option strong {
+    margin-right: 4px;
+}
+
+.bs-dates .bs-option__loc {
+    flex-basis: 100%;
+}

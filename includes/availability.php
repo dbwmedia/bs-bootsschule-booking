@@ -5,8 +5,10 @@
  * Free seats = Amelia capacity - Amelia bookings - Kombi orders from WooCommerce.
  * Kombi bookings are not written to Amelia, so they are subtracted here.
  *
- * Every badge states a fact (real free seats, real days until start).
- * No artificial scarcity: that would be misleading advertising (UWG §5).
+ * Within the urgency window a generic "few seats left" hint is shown on
+ * request of the client, even if more seats are free. The client is aware
+ * of the legal risk (UWG §5). Switch it off with:
+ * add_filter('bs_booking_scarcity_hint', '__return_false');
  */
 
 if (!defined('WPINC')) die;
@@ -108,6 +110,8 @@ function bs_availability_badges(array $availability) {
     if ($availability['low']) {
         $free = $availability['free'];
         $badges[] = array('text' => 'Nur noch ' . $free . ($free === 1 ? ' Platz' : ' Plätze') . ' frei', 'type' => 'low');
+    } elseif ($availability['soon'] && apply_filters('bs_booking_scarcity_hint', true)) {
+        $badges[] = array('text' => 'Nur noch wenige Plätze', 'type' => 'low');
     }
     if ($availability['soon']) {
         $badges[] = array('text' => bs_format_start_hint($availability['days_until']), 'type' => 'soon');

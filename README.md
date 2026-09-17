@@ -31,10 +31,11 @@ Freie Plätze = Amelia-Kapazität - Amelia-Buchungen (approved/pending, Personen
 Pro Termin ein oder zwei Badges, **nur mit echten Fakten**:
 - `Ausgebucht`: 0 frei, Termin nicht wählbar (auch serverseitig geprüft)
 - `Nur noch X Plätze frei`: ab 5 freien Plätzen oder weniger (Filter `bs_booking_low_seats`)
+- `Nur noch wenige Plätze`: ab 14 Tagen vor Beginn, unabhängig von der echten Zahl (Kundenwunsch)
 - `Startet in X Tagen` / `morgen` / `heute`: ab 14 Tagen vor Beginn (Filter `bs_booking_urgency_days`)
 - sonst `Plätze frei`
 
-Keine künstliche Verknappung: eine unwahre Knappheitsangabe wäre irreführende Werbung (UWG §5).
+**Achtung:** "Nur noch wenige Plätze" ohne echte Knappheit ist rechtlich angreifbar (UWG §5, irreführende Knappheitsangabe). Auf ausdrücklichen Wunsch des Kunden eingebaut, Risiko ist ihm bekannt (Hinweis vom 17.09.2026). Abschalten per `add_filter('bs_booking_scarcity_hint', '__return_false');`
 Events mit Ticket-Preisen (customPricing) oder ohne Kapazität gelten als "Kapazität unbekannt" und bekommen keine Platzangabe.
 Die Produkt-Box zeigt pro Termin die Rechnung (z.B. "10 frei (15 Plätze, 3 Amelia, 2 Kombi)").
 

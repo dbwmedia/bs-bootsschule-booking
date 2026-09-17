@@ -10,10 +10,17 @@
 if (!defined('WPINC')) die;
 
 /**
- * Rendered right after the Amelia event list (theme hooks it at priority 30):
- * visitors see the course they came for first, undecided ones meet the offer.
+ * Rendered right after the Amelia event list: visitors see the course they
+ * came for first, undecided ones meet the offer.
+ *
+ * The child theme hooks the event list at priority 30. Blocksy renders the
+ * summary in layers and skips other priorities around it (31 never ran), so
+ * the box uses priority 30 as well and is registered after the theme's
+ * functions.php has loaded, which puts it right behind the event list.
  */
-add_action('woocommerce_single_product_summary', 'bs_upsell_display', 31);
+add_action('after_setup_theme', function() {
+    add_action('woocommerce_single_product_summary', 'bs_upsell_display', 30);
+}, 100);
 
 function bs_upsell_display() {
     global $product;

@@ -39,9 +39,21 @@ Pro Termin ein oder zwei Badges, **nur mit echten Fakten**:
 Events mit Ticket-Preisen (customPricing) oder ohne Kapazität gelten als "Kapazität unbekannt" und bekommen keine Platzangabe.
 Die Produkt-Box zeigt pro Termin die Rechnung (z.B. "10 frei (15 Plätze, 3 Amelia, 2 Kombi)").
 
-## Bewusste Grenzen
+## Buchungen in Amelia (seit v2.5)
 
-- **Kein Zurückschreiben an Amelia.** Kombi-Buchungen stehen nur in den WooCommerce-Bestellungen (Meta `_bs_amelia_event_ids`), nicht in Amelias Teilnehmerlisten. Amelia selbst zeigt deshalb zu viele freie Plätze an, die Kombi-Seite rechnet sie ab.
+Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`includes/amelia-sync.php`):
+
+| Bestellstatus | Aktion |
+|---|---|
+| on-hold / processing / completed | fehlende Buchungen anlegen (Status nach Amelias WooCommerce-Regeln) |
+| cancelled / failed / refunded | angelegte Buchungen stornieren |
+
+- Nutzt denselben internen Aufruf wie Amelias eigene WooCommerce-Integration (`EventReservationService::processRequest`, Gateway `wc`). Geprüft gegen **Amelia 9.8**. Nach Amelia-Updates einmal testen.
+- Fehler blockieren nie die Bestellung, sie landen als Bestellnotiz.
+- Buchungs-IDs stehen im Item-Meta `_bs_amelia_bookings`, jeder Lauf ist dadurch idempotent.
+- Der Kombi-Preis wird anteilig nach Amelia-Listenpreisen auf die Kurse verteilt (Zahlungsbetrag in Amelia).
+- **Keine Amelia-Mails**: Buchungen werden als "actions completed" markiert, sonst würde Amelias Cron nach 5 Minuten nachsenden. Einschalten: `add_filter('bs_booking_amelia_notifications', '__return_true');`
+- Bereits in Amelia gebuchte Kombi-Kurse werden bei den freien Plätzen nicht mehr zusätzlich abgezogen.
 
 ## Dateien
 
@@ -51,4 +63,5 @@ Die Produkt-Box zeigt pro Termin die Rechnung (z.B. "10 frei (15 Plätze, 3 Amel
 - `includes/admin.php` Produkt-Metabox mit Vorschau
 - `includes/frontend.php` Terminwahl auf der Produktseite, AJAX "In Warenkorb"
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung
+- `includes/amelia-sync.php` Kombi-Bestellungen als Amelia-Buchungen anlegen und stornieren
 - `build/frontend.css`, `build/frontend.js` Frontend-Assets (handgeschrieben, kein Build-Schritt)

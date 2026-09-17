@@ -26,6 +26,8 @@ function bs_low_seats_threshold() {
 /**
  * Seats taken by Kombi orders per Amelia event id.
  * Counts orders that are paid or awaiting payment confirmation.
+ * Events already written to Amelia (item meta `_bs_amelia_bookings`) are
+ * skipped, because Amelia's own booking count includes them.
  */
 function bs_kombi_booked_counts() {
     static $counts = null;
@@ -36,10 +38,11 @@ function bs_kombi_booked_counts() {
 
     global $wpdb;
     $rows = $wpdb->get_results(
-        "SELECT oi.order_id, ids.meta_value AS event_ids, qty.meta_value AS qty
+        "SELECT oi.order_id, ids.meta_value AS event_ids, qty.meta_value AS qty, synced.meta_value AS synced
          FROM {$wpdb->prefix}woocommerce_order_itemmeta ids
          INNER JOIN {$wpdb->prefix}woocommerce_order_items oi ON oi.order_item_id = ids.order_item_id
          LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta qty ON qty.order_item_id = ids.order_item_id AND qty.meta_key = '_qty'
+         LEFT JOIN {$wpdb->prefix}woocommerce_order_itemmeta synced ON synced.order_item_id = ids.order_item_id AND synced.meta_key = '_bs_amelia_bookings'
          WHERE ids.meta_key = '_bs_amelia_event_ids'",
         ARRAY_A
     );
@@ -55,8 +58,10 @@ function bs_kombi_booked_counts() {
         if (!$order_counts[$order_id]) continue;
 
         $qty = max(1, (int) $row['qty']);
+        $synced = (array) json_decode((string) $row['synced'], true);
         foreach ((array) json_decode($row['event_ids'], true) as $event_id) {
             $event_id = (int) $event_id;
+            if (!empty($synced[$event_id])) continue;
             $counts[$event_id] = (isset($counts[$event_id]) ? $counts[$event_id] : 0) + $qty;
         }
     }

@@ -39,6 +39,9 @@ add_action('woocommerce_checkout_create_order_line_item', function($item, $cart_
             $item->add_meta_data($course['course'], $value);
         }
         $item->add_meta_data('_bs_amelia_event_ids', wp_json_encode(array_column($values['bs_courses'], 'event_id')));
+        $item->add_meta_data('_bs_courses', wp_json_encode(array_map(function($course) {
+            return array('course' => $course['course'], 'event_id' => $course['event_id']);
+        }, $values['bs_courses'])));
         return;
     }
 

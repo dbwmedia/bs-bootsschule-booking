@@ -421,19 +421,24 @@
     flex-basis: 100%;
 }
 
-/* v2.1: availability badges (facts only: real free seats, real start date) */
-.bs-dates label > .bs-badges {
-    flex: 0 0 auto;
+/* v2.3: availability badges as eyebrow row above the date */
+.bs-dates .bs-option > .bs-badges {
     display: flex;
     flex-wrap: wrap;
-    justify-content: flex-end;
     gap: 6px;
-    margin-left: 12px;
+    flex-basis: 100%;
+    margin-bottom: 2px;
 }
 
 .bs-dates label small.bs-badge {
     margin-left: 0;
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 1.5;
+    letter-spacing: 0.02em;
     white-space: nowrap;
+    border-radius: 20px;
 }
 
 .bs-dates label small.bs-badge--open {
@@ -447,27 +452,17 @@
 }
 
 .bs-dates label small.bs-badge--low {
-    color: #fff;
-    background: var(--bs-danger);
-    font-weight: 600;
+    color: var(--bs-danger);
+    background: rgba(239, 68, 68, 0.1);
 }
 
 .bs-dates label small.bs-badge--full {
-    color: var(--bs-danger);
-    background: rgba(239, 68, 68, 0.1);
-    font-weight: 700;
+    color: var(--bs-text-muted);
+    background: #e5e7eb;
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
 
-@media (max-width: 640px) {
-    .bs-dates label {
-        flex-wrap: wrap;
-    }
-
-    .bs-dates label > .bs-badges {
-        flex-basis: 100%;
-        justify-content: flex-start;
-        margin: 8px 0 0 38px;
-    }
+.bs-dates .bs-nowrap {
+    white-space: nowrap;
 }

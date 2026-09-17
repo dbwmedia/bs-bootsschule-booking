@@ -59,15 +59,17 @@ function bs_bootsschule_display() {
                 echo '<label' . ($full ? ' class="disabled"' : '') . '>';
                 echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '"' . ($full ? ' disabled' : '') . '>';
                 echo '<span class="bs-option">';
-                echo '<strong>' . esc_html(bs_format_days($event['days'])) . '</strong>';
-                echo '<span class="bs-option__time">' . esc_html(bs_format_times($event['days'])) . '</span>';
-                if (!$location && $event['location']) {
-                    echo '<span class="bs-option__loc">📍 ' . esc_html($event['location']) . '</span>';
-                }
-                echo '</span>';
                 echo '<span class="bs-badges">';
                 foreach (bs_availability_badges($event['availability']) as $badge) {
                     echo '<small class="bs-badge bs-badge--' . $badge['type'] . '">' . esc_html($badge['text']) . '</small>';
+                }
+                echo '</span>';
+                // Keep each day ("Sa. 26.09.2026") together when the line wraps.
+                $days = array_map(function($day) { return '<span class="bs-nowrap">' . esc_html($day) . '</span>'; }, explode(' + ', bs_format_days($event['days'])));
+                echo '<strong>' . implode(' + ', $days) . '</strong>';
+                echo '<span class="bs-option__time">' . esc_html(bs_format_times($event['days'])) . '</span>';
+                if (!$location && $event['location']) {
+                    echo '<span class="bs-option__loc">📍 ' . esc_html($event['location']) . '</span>';
                 }
                 echo '</span>';
                 echo '</label>';

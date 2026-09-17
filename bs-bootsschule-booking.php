@@ -3,8 +3,15 @@
  * Plugin Name: BS Bootsschule Booking
  * Description: Kombi-Buchung für die Bootsschule. Liest die Kurstermine direkt aus Amelia und verkauft sie als WooCommerce-Kombi-Produkt.
  * Version: 2.5.0
- * Author: Julio Litzenberg
+ * Requires at least: 6.5
+ * Requires PHP: 7.4
+ * Requires Plugins: woocommerce, ameliabooking
+ * Author: Dennis Buchwald
+ * Author URI: https://dennisbuchwald.de
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: bs-bootsschule-booking
+ * Update URI: https://github.com/dbwmedia/bs-bootsschule-booking
  */
 
 if (!defined('WPINC')) die;

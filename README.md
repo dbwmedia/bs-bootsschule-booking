@@ -65,3 +65,8 @@ Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`i
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung
 - `includes/amelia-sync.php` Kombi-Bestellungen als Amelia-Buchungen anlegen und stornieren
 - `build/frontend.css`, `build/frontend.js` Frontend-Assets (handgeschrieben, kein Build-Schritt)
+
+## Autoren
+
+- Ab v2.0: Neuentwicklung mit Amelia-Anbindung durch Dennis Buchwald (dbw media).
+- v1.x (eigene Terminverwaltung, Kombi-Produkt-Grundidee): Julio Litzenberg.

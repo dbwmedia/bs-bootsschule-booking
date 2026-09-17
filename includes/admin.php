@@ -47,6 +47,17 @@ function bs_bootsschule_product_meta($post) {
     }
     echo '</tbody></table>';
 
+    // Upsell on the single course products
+    $upsell_ids = bs_upsell_product_ids($post->ID);
+    $products = get_posts(array('post_type' => 'product', 'post_status' => 'publish', 'posts_per_page' => -1, 'orderby' => 'title', 'order' => 'ASC', 'post__not_in' => array($post->ID)));
+    echo '<h4 style="margin:16px 0 4px;">Upsell-Box auf Einzelprodukten</h4>';
+    echo '<p class="description" style="margin:0 0 6px;">Auf diesen Produkten erscheint ein Hinweis auf das Kombi-Produkt mit der echten Ersparnis (Summe der Einzelpreise minus Kombi-Preis). Wähle alle Einzelkurse, aus denen die Kombi besteht (Strg/Cmd für Mehrfachauswahl). Leer = keine Box.</p>';
+    echo '<select name="_bs_upsell_products[]" multiple size="6" style="min-width:320px;">';
+    foreach ($products as $p) {
+        echo '<option value="' . $p->ID . '"' . (in_array($p->ID, $upsell_ids, true) ? ' selected' : '') . '>' . esc_html($p->post_title) . '</option>';
+    }
+    echo '</select>';
+
     // Preview of the saved configuration
     if (!empty($courses)) {
         echo '<h4 style="margin:16px 0 8px;">Vorschau (gespeicherter Stand)</h4>';
@@ -121,4 +132,7 @@ add_action('save_post_product', function($post_id) {
         );
     }
     update_post_meta($post_id, '_bs_courses', $courses);
+
+    $upsell = isset($_POST['_bs_upsell_products']) ? array_filter(array_map('absint', (array) $_POST['_bs_upsell_products'])) : array();
+    update_post_meta($post_id, '_bs_upsell_products', $upsell ? ',' . implode(',', $upsell) . ',' : '');
 });

@@ -64,7 +64,16 @@ Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`i
 - `includes/frontend.php` Terminwahl auf der Produktseite, AJAX "In Warenkorb"
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung
 - `includes/amelia-sync.php` Kombi-Bestellungen als Amelia-Buchungen anlegen und stornieren
+- `includes/upsell.php` Kombi-Upsell-Box auf den Einzelprodukten
 - `build/frontend.css`, `build/frontend.js` Frontend-Assets (handgeschrieben, kein Build-Schritt)
+
+## Upsell-Box (seit v2.6)
+
+Auf Einzelprodukten (z.B. SBF Binnen, SBF See) erscheint über der Amelia-Terminliste eine Box, die das Kombi-Produkt bewirbt (`includes/upsell.php`).
+
+- Einstellung im **Kombi-Produkt**: "Upsell-Box auf Einzelprodukten", dort alle Einzelkurse wählen, aus denen die Kombi besteht.
+- Zahlen sind echt: Summe der Einzelpreise durchgestrichen, Kombi-Preis, Ersparnis in € und % (abgerundet), nächster buchbarer Start pro Kurs.
+- Keine Box, wenn es keine Ersparnis gibt, das Kombi-Produkt nicht kaufbar ist oder ein Kurs keinen freien Termin mehr hat.
 
 ## Autoren
 

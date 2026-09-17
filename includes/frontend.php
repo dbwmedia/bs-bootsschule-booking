@@ -57,7 +57,9 @@ function bs_bootsschule_display() {
             foreach ($course['events'] as $event) {
                 $full = $event['availability']['full'];
                 echo '<label' . ($full ? ' class="disabled"' : '') . '>';
-                echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '"' . ($full ? ' disabled' : '') . '>';
+                echo '<input type="radio" name="bs_course[' . $index . ']" value="' . $event['id'] . '"'
+                    . ' data-days="' . esc_attr(implode(',', array_column($event['days'], 'date'))) . '"'
+                    . ($full ? ' disabled data-full="1"' : '') . '>';
                 echo '<span class="bs-option">';
                 echo '<span class="bs-badges">';
                 foreach (bs_availability_badges($event['availability']) as $badge) {
@@ -93,6 +95,7 @@ function bs_bootsschule_display() {
                 'chooseFor'   => 'Bitte Termin für %s wählen',
                 'adding'      => 'Wird hinzugefügt...',
                 'serverError' => 'Es ist ein Fehler aufgetreten. Bitte versuche es erneut.',
+                'overlap'     => 'Überschneidet sich mit deinem %s-Termin',
             ),
         ));
     } else {
@@ -135,6 +138,11 @@ function bs_bootsschule_ajax() {
             'days'     => $event['days'],
             'location' => $course['location'] !== '' ? $course['location'] : $event['location'],
         );
+    }
+
+    $overlap = bs_find_overlap($booked);
+    if ($overlap) {
+        wp_send_json_error(array('message' => 'Die Termine für ' . $overlap[0] . ' und ' . $overlap[1] . ' überschneiden sich. Bitte wähle andere Termine.'));
     }
 
     if (empty($booked)) {

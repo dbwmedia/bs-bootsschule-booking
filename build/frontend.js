@@ -25,6 +25,46 @@
         button.textContent = missing === null ? config.i18n.addToCart : config.i18n.chooseFor.replace('%s', missing);
     }
 
+    /**
+     * Dates of other courses that share a day with the current selection
+     * cannot be chosen (e.g. SBF Binnen and SBF See on the same weekend).
+     */
+    function updateOverlaps() {
+        courses.forEach(function (course) {
+            var blocked = {};
+            courses.forEach(function (other) {
+                if (other === course) return;
+                var selected = other.querySelector('input[type="radio"]:checked');
+                if (!selected) return;
+                selected.dataset.days.split(',').forEach(function (day) {
+                    blocked[day] = other.dataset.courseTitle;
+                });
+            });
+
+            course.querySelectorAll('input[type="radio"]').forEach(function (input) {
+                if (input.dataset.full) return;
+                var label = input.closest('label');
+                var conflict = null;
+                input.dataset.days.split(',').forEach(function (day) {
+                    if (blocked[day]) conflict = blocked[day];
+                });
+
+                input.disabled = conflict !== null;
+                label.classList.toggle('disabled', conflict !== null);
+                var note = label.querySelector('.bs-badge--overlap');
+                if (conflict && !note) {
+                    note = document.createElement('small');
+                    note.className = 'bs-badge bs-badge--overlap';
+                    label.querySelector('.bs-badges').appendChild(note);
+                }
+                if (note) {
+                    if (conflict) note.textContent = config.i18n.overlap.replace('%s', conflict);
+                    else note.remove();
+                }
+            });
+        });
+    }
+
     function showError(message) {
         messages.textContent = message;
         messages.classList.add('error');
@@ -34,6 +74,7 @@
         if (event.target.matches('input[type="radio"]')) {
             messages.textContent = '';
             messages.classList.remove('error');
+            updateOverlaps();
             validate();
         }
     });

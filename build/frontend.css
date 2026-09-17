@@ -466,3 +466,8 @@
 .bs-dates .bs-nowrap {
     white-space: nowrap;
 }
+
+.bs-dates label small.bs-badge--overlap {
+    color: var(--bs-text-muted);
+    background: #e5e7eb;
+}

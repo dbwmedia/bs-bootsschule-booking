@@ -116,3 +116,20 @@ function bs_course_location(array $course) {
     $locations = array_unique(array_filter(array_column($course['events'], 'location')));
     return count($locations) === 1 ? reset($locations) : '';
 }
+
+/**
+ * First pair of selected dates (from different courses) that share a calendar day.
+ * $selected is a list of ['course' => title, 'days' => [...]].
+ * Returns [course_a, course_b] or null.
+ */
+function bs_find_overlap(array $selected) {
+    foreach ($selected as $i => $a) {
+        $a_dates = array_column($a['days'], 'date');
+        foreach (array_slice($selected, $i + 1) as $b) {
+            if (array_intersect($a_dates, array_column($b['days'], 'date'))) {
+                return array($a['course'], $b['course']);
+            }
+        }
+    }
+    return null;
+}

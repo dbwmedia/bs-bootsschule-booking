@@ -110,14 +110,6 @@ function bs_format_times(array $days) {
     return implode(', ', $parts) . ' Uhr';
 }
 
-/** "2-Tage-Kurs" if every event of the course spans the same number (> 1) of days. */
-function bs_course_duration_label(array $events) {
-    $counts = array_unique(array_map(function($event) { return count($event['days']); }, $events));
-    if (count($counts) !== 1) return '';
-    $count = reset($counts);
-    return $count > 1 ? $count . '-Tage-Kurs' : '';
-}
-
 /** Location shown under the course title: override, or the one all events share. */
 function bs_course_location(array $course) {
     if (!empty($course['location'])) return $course['location'];

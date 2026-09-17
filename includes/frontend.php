@@ -41,13 +41,10 @@ function bs_bootsschule_display() {
     echo '<p>' . (count($courses) > 1 ? 'Bitte wähle pro Kurs einen Termin.' : 'Bitte wähle einen Termin.') . '</p>';
 
     foreach ($courses as $index => $course) {
-        $duration = bs_course_duration_label($course['events']);
         $location = bs_course_location($course);
 
         echo '<div class="bs-template" data-course-index="' . $index . '" data-course-title="' . esc_attr($course['title']) . '">';
-        echo '<h4>' . esc_html($course['title']);
-        if ($duration) echo ' <span>' . esc_html($duration) . '</span>';
-        echo '</h4>';
+        echo '<h4>' . esc_html($course['title']) . '</h4>';
         if ($location) echo '<p class="loc">📍 ' . esc_html($location) . '</p>';
 
         if (empty($course['events'])) {

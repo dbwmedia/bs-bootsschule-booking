@@ -29,6 +29,10 @@ function bs_early_defaults() {
         'note'       => 'So funktioniert es: Du bekommst sofort einen Gutschein über den vollen Kurswert von {preis}. Damit buchst du deinen Wunschtermin, sobald er online ist. Der Gutschein ist bis {gueltig_bis} gültig.',
         'cta'        => 'Jetzt Platz für {jahr} sichern',
         'cart_label' => 'Frühbucher-Aktion {jahr}',
+        'banner'      => 'yes',
+        'banner_text' => 'Frühbucher-Aktion: Sichere dir jetzt deinen Kurs für {jahr} und spare {rabatt}.',
+        'banner_link' => 'Zu den Kursen',
+        'banner_url'  => '/produkte/',
         'map'        => array(),
     );
 }
@@ -317,7 +321,9 @@ function bs_early_admin_save() {
         'display'    => (isset($in['display']) && $in['display'] === 'always') ? 'always' : 'no_dates',
         'map'        => array(),
     );
-    foreach (array('eyebrow', 'title', 'cta', 'cart_label') as $key) {
+    $settings['banner']     = !empty($in['banner']) ? 'yes' : 'no';
+    $settings['banner_url'] = esc_url_raw(isset($in['banner_url']) ? trim($in['banner_url']) : '');
+    foreach (array('eyebrow', 'title', 'cta', 'cart_label', 'banner_text', 'banner_link') as $key) {
         $settings[$key] = sanitize_text_field(isset($in[$key]) ? $in[$key] : '');
     }
     foreach (array('text', 'note') as $key) {
@@ -329,6 +335,8 @@ function bs_early_admin_save() {
         }
     }
     update_option('bs_early_settings', $settings, false);
+    bs_early_flush_cache();
+    bs_early_schedule_end_flush($settings['end']);
     echo '<div class="notice notice-success"><p>Gespeichert.</p></div>';
 }
 
@@ -358,6 +366,8 @@ function bs_early_admin_page() {
         'note'       => array('Hinweis (klein)', 'textarea'),
         'cta'        => array('Button', 'input'),
         'cart_label' => array('Bezeichnung im Warenkorb', 'input'),
+        'banner_text' => array('Hinweis Startseite: Text', 'input'),
+        'banner_link' => array('Hinweis Startseite: Linktext', 'input'),
     );
     foreach ($fields as $key => $field) {
         echo '<tr><th>' . esc_html($field[0]) . '</th><td>';
@@ -368,6 +378,7 @@ function bs_early_admin_page() {
         }
         echo '</td></tr>';
     }
+    echo '<tr><th>Hinweis Startseite</th><td><label><input type="checkbox" name="banner" value="1"' . checked($s['banner'], 'yes', false) . '> schmale Leiste oben auf der Startseite, solange die Aktion läuft</label><br><input type="text" name="banner_url" value="' . esc_attr($s['banner_url']) . '" class="regular-text" placeholder="/produkte/"> Linkziel</td></tr>';
     echo '<tr><th>Platzhalter</th><td><code>{kurs}</code> <code>{jahr}</code> <code>{jahr_jetzt}</code> <code>{rabatt}</code> <code>{preis}</code> <code>{aktionspreis}</code> <code>{ersparnis}</code> <code>{gueltig_bis}</code> <code>{ende}</code></td></tr>';
     echo '</table>';
 
@@ -418,3 +429,48 @@ function bs_early_admin_page() {
     }
     echo '</div>';
 }
+
+// ---------------------------------------------------------------------------
+// Front page notice and page cache
+// ---------------------------------------------------------------------------
+
+/** Slim bar above the header on the front page while the campaign runs. */
+add_action('wp_body_open', function() {
+    if (!is_front_page() || !bs_early_is_running()) return;
+    $s = bs_early_settings();
+    if ($s['banner'] !== 'yes' || trim($s['banner_text']) === '') return;
+
+    // Only advertise if at least one course actually shows the offer.
+    $any = false;
+    foreach (bs_early_course_products() as $course_id) {
+        if (bs_early_offer($course_id)) { $any = true; break; }
+    }
+    if (!$any) return;
+
+    $url = $s['banner_url'] !== '' ? $s['banner_url'] : '/produkte/';
+    if (strpos($url, '/') === 0) $url = home_url($url);
+
+    echo '<style>.bs-early-bar{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:4px 14px;padding:10px 16px;background:#3f82ac;color:#fff;font-size:15px;line-height:1.4;text-align:center}.bs-early-bar strong{font-weight:700}.bs-early-bar a{color:#fff;font-weight:600;text-decoration:underline;text-underline-offset:3px;white-space:nowrap}.bs-early-bar a:hover{color:#fff;opacity:.85}@media(max-width:640px){.bs-early-bar{font-size:14px}}</style>';
+    echo '<div class="bs-early-bar" role="note"><span>' . wp_kses_post(bs_early_fill($s['banner_text']));
+    if ($s['end'] !== '') echo ' Nur bis ' . esc_html(date('d.m.Y', strtotime($s['end']))) . '.';
+    echo '</span>';
+    if (trim($s['banner_link']) !== '') echo '<a href="' . esc_url($url) . '">' . esc_html($s['banner_link']) . ' &rarr;</a>';
+    echo '</div>';
+});
+
+/** The page cache (WP Fastest Cache) would keep showing an ended campaign. */
+function bs_early_flush_cache() {
+    if (function_exists('wpfc_clear_all_cache')) {
+        wpfc_clear_all_cache(true);
+    }
+    do_action('bs_early_flush_cache');
+}
+
+/** Clear the cache once right after the campaign ends, so boxes and bar disappear. */
+function bs_early_schedule_end_flush($end) {
+    wp_clear_scheduled_hook('bs_early_campaign_ended');
+    if ($end === '') return;
+    $when = (new DateTimeImmutable($end . ' 00:05', wp_timezone()))->modify('+1 day')->getTimestamp();
+    if ($when > time()) wp_schedule_single_event($when, 'bs_early_campaign_ended');
+}
+add_action('bs_early_campaign_ended', 'bs_early_flush_cache');

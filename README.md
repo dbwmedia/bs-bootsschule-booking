@@ -63,6 +63,8 @@ Solange keine Kurstermine online sind, verkauft eine Box auf jeder Kursseite den
 - Anzeige wahlweise nur bei Kursen ohne Termine (Standard, ersetzt dann die leere Amelia-Liste) oder bei allen Kursen.
 - Der Rabatt gilt nur, wenn der Gutschein über die Box in den Warenkorb kommt (`?add-to-cart=<id>&bs_early=1`). Normale Gutschein-Käufe bleiben beim vollen Preis. Endet die Aktion, fällt ein Gutschein im Warenkorb auf den Normalpreis zurück.
 - Wiederverwendbar: Für die nächste Aktion (z.B. Weihnachten) Zeitraum, Jahr und Texte ändern.
+- Hinweis-Leiste oben auf der Startseite (seit v2.8.3, abschaltbar, Text und Linkziel einstellbar), nur solange mindestens ein Kurs die Box zeigt.
+- Cache: Speichern der Einstellungen leert WP Fastest Cache, am Tag nach dem Aktionsende passiert das automatisch per Cron, damit Box und Leiste verschwinden.
 - Verkaufte Frühbucher-Gutscheine stehen unten auf der Einstellungsseite (Item-Meta `_bs_early`).
 
 ## Dateien

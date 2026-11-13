@@ -36,6 +36,10 @@ function bs_bootsschule_display() {
         if (!$courses[$i]['has_seats']) $bookable = false;
     }
 
+    // Nothing bookable but an early booking offer runs: the offer box replaces
+    // the empty date selection instead of sitting under an error message.
+    if (!$bookable && function_exists('bs_early_offer') && bs_early_offer($product_id)) return;
+
     echo '<div class="bs-bootsschule-booking">';
     echo '<h3>Terminwahl</h3>';
     echo '<p>' . (count($courses) > 1 ? 'Bitte wähle pro Kurs einen Termin.' : 'Bitte wähle einen Termin.') . '</p>';

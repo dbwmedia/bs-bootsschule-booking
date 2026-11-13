@@ -55,6 +55,16 @@ Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`i
 - **Keine Amelia-Mails**: Buchungen werden als "actions completed" markiert, sonst würde Amelias Cron nach 5 Minuten nachsenden. Einschalten: `add_filter('bs_booking_amelia_notifications', '__return_true');`
 - Bereits in Amelia gebuchte Kombi-Kurse werden bei den freien Plätzen nicht mehr zusätzlich abgezogen.
 
+## Frühbucher-Aktion (seit v2.8)
+
+Solange keine Kurstermine online sind, verkauft eine Box auf jeder Kursseite den passenden **Kurs-Gutschein zum Aktionspreis** (`includes/early-booking.php`). Der Kunde zahlt z.B. 272 € und bekommt einen Gutschein über den vollen Kurswert von 320 €. Erstellung, PDF, Mail und Gültigkeit (3 Kalenderjahre, also z.B. bis 31.12.2029) kommen unverändert aus `bs-custom-mail`. Eingelöst wird der Gutschein wie jeder andere bei der Buchung des Termins.
+
+- Einstellungen unter **WooCommerce > Frühbucher-Aktion**: an/aus, Zeitraum, Rabatt in %, Abrunden auf volle Euro, Kursjahr, Texte mit Platzhaltern (`{kurs}`, `{jahr}`, `{aktionspreis}`, `{ersparnis}` ...), Zuordnung Kurs → Gutschein (automatisch über den Namen "Gutschein <Kurs>").
+- Anzeige wahlweise nur bei Kursen ohne Termine (Standard, ersetzt dann die leere Amelia-Liste) oder bei allen Kursen.
+- Der Rabatt gilt nur, wenn der Gutschein über die Box in den Warenkorb kommt (`?add-to-cart=<id>&bs_early=1`). Normale Gutschein-Käufe bleiben beim vollen Preis. Endet die Aktion, fällt ein Gutschein im Warenkorb auf den Normalpreis zurück.
+- Wiederverwendbar: Für die nächste Aktion (z.B. Weihnachten) Zeitraum, Jahr und Texte ändern.
+- Verkaufte Frühbucher-Gutscheine stehen unten auf der Einstellungsseite (Item-Meta `_bs_early`).
+
 ## Dateien
 
 - `includes/amelia.php` Lesen der Amelia-Tabellen, UTC-Umrechnung, Tage aus Zeiträumen
@@ -65,6 +75,7 @@ Kombi-Bestellungen werden als echte Amelia-Buchungen angelegt, eine pro Kurs (`i
 - `includes/cart.php` Anzeige in Warenkorb, Checkout und Bestellung
 - `includes/amelia-sync.php` Kombi-Bestellungen als Amelia-Buchungen anlegen und stornieren
 - `includes/upsell.php` Kombi-Upsell-Box auf den Einzelprodukten
+- `includes/early-booking.php` Frühbucher-Aktion (Box, Preis, Einstellungen)
 - `includes/upsell-stats.php`, `build/upsell.js` anonyme Upsell-Statistik (Backend-Seite)
 - `build/frontend.css`, `build/frontend.js` Frontend-Assets (handgeschrieben, kein Build-Schritt)
 
